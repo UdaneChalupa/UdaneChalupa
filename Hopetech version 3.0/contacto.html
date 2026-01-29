@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HopeTECH - Contacto</title>
+  <link rel="icon" href="imagenes/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="caja-general cabecera">
+    <a href="/" class="logo" aria-label="HopeTECH - Volver al inicio">HopeTECH</a>
+    <nav class="nav-principal">
+      <ul class="menu">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+        <li class="menu-item-desplegable">
+          <a href="servicios.html">Servicios <i class="fas fa-chevron-down" style="font-size:0.8rem;margin-left:8px;"></i></a>
+          <div class="submenu-precios">
+            <div class="submenu-tarjeta">
+              <a href="precios.html"><strong>Precios</strong></a>
+            </div>
+          </div>
+        </li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+        <li><a href="contacto.html" class="activo">Contacto</a></li>
+      </ul>
+      <div class="botones-derecha">
+        <button id="theme-toggle" aria-label="Cambiar modo oscuro/claro">
+          <i class="fas fa-sun"></i>
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="boton-menu" aria-expanded="false" aria-label="Abrir menú">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="portada">
+  <div class="caja-general">
+    <h2 data-aos="fade-up">¡Hablemos!</h2>
+    <p data-aos="fade-up" data-aos-delay="200">Proyecto del CIFP Txurdinaga LHII · Te respondemos rápido</p>
+  </div>
+</section>
+
+<section class="contacto-brutal">
+  <div class="mapa-full" data-aos="fade-up">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5811.403585151314!2d-2.9024069!3d43.2576713!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd4e4fac87437727%3A0x364f27e82def0130!2sCIFP%20Txurdinaga%20LHII!5e0!3m2!1ses!2ses!4v1729793200960!5m2!1ses!2ses" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    
+    <div class="caja-contacto">
+      <h3 data-aos="fade-up">CONTACTO</h3>
+      <p data-aos="fade-up" data-aos-delay="100"><i class="fas fa-map-marker-alt" style="color:#ff6f61;margin-right:12px;"></i> Doctor Ornilla 2, 48004 Bilbao</p>
+      <p data-aos="fade-up" data-aos-delay="200"><i class="fas fa-phone" style="color:#ff6f61;margin-right:12px;"></i> +34 944 125 712</p>
+      <p data-aos="fade-up" data-aos-delay="300"><i class="fas fa-envelope" style="color:#ff6f61;margin-right:12px;"></i> hope.tech.confiable@gmail.com</p>
+      <div class="transporte" data-aos="fade-up" data-aos-delay="400">
+        <div><strong>METRO</strong><br>L3 Txurdinaga / Otxarkoaga</div>
+        <div><strong>BILBOBUS</strong><br>03 · 38 · 30 · 13</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tarjetas-brutal" data-aos="fade-up">
+    <div class="card">
+      <h4>Horario del centro</h4>
+      <p>Lunes a viernes: 8:00 – 21:30 h.<br>Secretaría: 9:00 – 14:00 h.</p>
+    </div>
+    <div class="card">
+      <h4>Disponibilidad proyecto</h4>
+      <p>¡Escríbenos al Gmail cuando quieras!<br>Respondemos en menos de 24-48 h.</p>
+    </div>
+    <div class="card">
+      <h4>Redes</h4>
+      <p>Síguenos para ver avances del proyecto</p>
+    </div>
+  </div>
+
+  <div class="formulario-brutal" data-aos="fade-up">
+    <form action="https://api.web3forms.com/submit" method="POST" id="contact-form">
+      <input type="hidden" name="access_key" value="eed0f0b1-672c-4660-922f-1f4208c00ddd">
+      <h3>Envíanos tu consulta</h3>
+      <input type="text" name="name" placeholder="Nombre *" required>
+      <input type="email" name="email" placeholder="Email *" required>
+      <input type="tel" name="phone" placeholder="Teléfono (opcional)">
+      <textarea name="message" rows="6" placeholder="Cuéntanos sobre tu proyecto o duda *" required></textarea>
+      <input type="checkbox" name="botcheck" style="display:none">
+      <div id="result" style="margin-top:20px; min-height:30px; font-weight:600;"></div>
+      <button type="submit">ENVIAR MENSAJE</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="caja-general footer-grid">
+    <div class="footer-col">
+      <h3 style="font-size:2.8rem;font-weight:800;color:white;margin-bottom:20px;">
+        <a href="/" class="logo" aria-label="HopeTECH - Volver al inicio">HopeTECH</a>
+      </h3>
+      <p style="color:#ddd;max-width:300px;line-height:1.7;">Proyecto del CIFP Txurdinaga LHII · Soluciones tecnológicas innovadoras desde Bilbao</p>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Enlaces</h4>
+      <ul style="list-style:none;color:#ccc;line-height:2.2;">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="sobre-nosotros.html">Sobre nosotros</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Contacto</h4>
+      <p style="color:#ccc;line-height:2;">
+        <i class="fas fa-envelope" style="color:#ff6f61;margin-right:12px;"></i> hope.tech.confiable@gmail.com<br>
+        <i class="fas fa-phone" style="color:#ff6f61;margin-right:12px;"></i> +34 944 125 712<br>
+        <i class="fas fa-map-marker-alt" style="color:#ff6f61;margin-right:12px;"></i> Doctor Ornilla 2, Bilbao
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Créditos</h4>
+      <p style="color:#ccc;font-size:0.95rem;line-height:1.8;">
+        © 2025 HopeTECH<br>
+        Todos los derechos reservados<br><br>
+        Imágenes de <a href="https://freepik.com" target="_blank" style="color:#ff6f61;text-decoration:none;">Freepik</a>
+      </p>
+    </div>
+  </div>
+  <div style="text-align:center;padding:30px;background:#2d1b69;color:#999;font-size:0.9rem;">
+    Hecho con <i class="fas fa-heart" style="color:#ff6f61;"></i> por el mejor grupo del CIFP Txurdinaga LHII
+  </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="Javascript/script.js" defer></script>
+<script src="Javascript/bromita.js" defer></script>
+</body>
+</html>

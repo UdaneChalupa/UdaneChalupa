@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Caza Conejos</title>
+  <meta name="theme-color" content="#1a0033">
+
+  <style>
+    :root {
+      --hue: 280;
+      --primary: #d500f9;
+      --accent: #ff40df;
+      --danger: #ff1744;
+      --gold: #ffd700;
+      --cream: #0d001a;
+      --text: #e0b0ff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      height:100vh;
+      font-family:system-ui,-apple-system,BlinkMacOSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+      background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #3d0066);
+      background-size: 300% 300%;
+      animation: bgBreathe 18s ease infinite;
+      color: var(--text);
+      overflow:hidden;
+      cursor:crosshair;
+      user-select:none;
+      touch-action:manipulation;
+      image-rendering:pixelated;
+      position: relative;
+    }
+    @keyframes bgBreathe {
+      0%,100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* ============================================= */
+    /*             PANTALLAS Y OVERLAYS              */
+    /* ============================================= */
+    #start-screen .bunny-fall {
+      position: absolute;
+      pointer-events: none;
+      width: 40px;
+      height: 40px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0;
+      top: -15vh;
+      animation: fall-bunny linear forwards infinite;
+      z-index: 999;
+    }
+    @keyframes fall-bunny {
+      0% { transform: translateY(0) rotate(0deg) scale(0.7); opacity: 0; }
+      8% { opacity: 1; }
+      100% { transform: translateY(150vh) rotate(1800deg) scale(1.4); opacity: 0; }
+    }
+
+    #ui {
+      position:fixed;
+      top:16px;
+      left:16px;
+      z-index:10002;
+      background:rgba(20,0,40,0.92);
+      backdrop-filter:blur(13px);
+      padding:15px 25px;
+      border-radius:30px;
+      border:3px solid var(--primary);
+      font-weight:700;
+      font-size:1.35rem;
+      box-shadow:0 12px 35px rgba(213,0,249,0.45);
+      pointer-events:none;
+      color: #e0b0ff;
+    }
+    #ui > div { margin:9px 0; }
+    #level-display {
+      color: var(--primary);
+      font-size:1.75rem;
+      text-shadow:0 0 18px var(--primary);
+    }
+
+    .screen-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(10,0,30,0.97);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      z-index:10005;
+      text-align:center;
+      padding:20px;
+    }
+
+    h1 {
+      font-size:clamp(3.5rem,10vw,7rem);
+      font-weight:900;
+      margin-bottom:0.5em;
+      color:var(--primary);
+      text-shadow:0 8px 25px rgba(213,0,249,0.7);
+      animation: floatTitle 6s ease-in-out infinite;
+    }
+    @keyframes floatTitle {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    button {
+      padding:20px 70px;
+      font-size:clamp(2rem,6vw,3rem);
+      font-weight:900;
+      background: linear-gradient(45deg, var(--primary), #c2185b);
+      color:white;
+      border:none;
+      border-radius:60px;
+      cursor:pointer;
+      box-shadow:0 12px 50px rgba(213,0,249,0.65);
+      transition:all 0.25s;
+      margin:25px;
+      position: relative;
+      overflow: hidden;
+      animation: pulseBtn 2.5s infinite;
+    }
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.8s ease, height 0.8s ease;
+    }
+    button:hover::after {
+      width: 400px;
+      height: 400px;
+    }
+    button:hover {
+      transform:translateY(-8px) scale(1.08);
+      box-shadow:0 25px 80px rgba(213,0,249,0.95);
+    }
+    button:active { transform:scale(0.92); }
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    /* ============================================= */
+    /*         BOTONES DE CONTROL INFERIORES         */
+    /* ============================================= */
+    #bottom-controls {
+      position: fixed;
+      bottom: clamp(12px, 3.5vw, 28px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      padding: 0 clamp(10px, 5vw, 25px);
+      z-index: 10001;
+      pointer-events: auto;
+      gap: clamp(12px, 5vw, 30px); /* ← FIX: separación visible */
+    }
+
+    .control-btn {
+      width:  clamp(68px,  19vw,  82px);
+      height: clamp(68px,  19vw,  82px);
+      font-size: clamp(2rem, 7.5vw, 2.6rem);
+      border: 3.5px solid var(--primary);
+      background: rgba(20,0,40,0.92);
+      border-radius: 50%;
+      color: var(--primary);
+      box-shadow: 0 6px 24px rgba(213,0,249,0.38);
+      backdrop-filter: blur(12px);
+      transition: all 0.22s ease;
+    }
+
+    .control-btn:hover {
+      transform: scale(1.20) translateY(-3px);
+      box-shadow: 0 14px 48px rgba(213,0,249,0.68);
+    }
+
+    .control-btn:active {
+      transform: scale(0.88);
+    }
+
+    @media (max-width: 420px) {
+      #bottom-controls {
+        padding: 0 8px;
+        gap: clamp(8px, 4vw, 16px);
+      }
+      .control-btn {
+        width:  clamp(58px, 21vw, 72px);
+        height: clamp(58px, 21vw, 72px);
+        font-size: clamp(1.9rem, 8vw, 2.4rem);
+      }
+    }
+
+    @media (max-width: 480px) {
+      #bottom-controls {
+        gap: clamp(10px, 5vw, 18px);
+      }
+      .control-btn {
+        width: clamp(60px, 19vw, 78px);
+        height: clamp(60px, 19vw, 78px);
+        font-size: clamp(1.8rem, 7.5vw, 2.4rem);
+      }
+    }
+
+    /* FIX HITBOX: contenedor más grande */
+    .bunny-container {
+      position: absolute;
+      pointer-events: auto;
+      cursor: crosshair;
+      z-index: 900;
+    }
+    .bunny-container img {
+      pointer-events: none;
+      image-rendering: pixelated;
+      transition: opacity 0.4s ease-out;
+    }
+
+    .bunny {
+      will-change: transform, opacity;
+      transform: translate3d(var(--x,0px), var(--y,0px), 0) rotate(var(--rot,0deg)) scale(var(--s,1));
+    }
+    .golden-bunny {
+      filter: drop-shadow(0 0 40px var(--gold)) brightness(1.6);
+      image-rendering: pixelated !important;
+      image-rendering: -moz-crisp-edges !important;
+      image-rendering: crisp-edges !important;
+      -webkit-image-rendering: pixelated !important;
+      will-change: filter, transform;
+      animation: goldenPulse 1.2s infinite alternate;
+    }
+    @keyframes goldenPulse {
+      to { transform: scale(calc(var(--s,1) * 1.28)); }
+    }
+
+    .powerup {
+      position:absolute;
+      width:clamp(100px, 20vw, 140px);
+      height:clamp(100px, 20vw, 140px);
+      border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #ffb3d9, #c2e0ff);
+      border:6px solid var(--accent);
+      box-shadow:0 0 35px rgba(255,204,170,0.5), inset 0 0 25px rgba(255,255,255,0.6);
+      color:white;
+      font-size:clamp(1.8rem, 4vw, 2.3rem);
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.1;
+      z-index:1000;
+      cursor:pointer;
+      animation:powerupGlow 1s infinite alternate;
+      transition:all 0.4s;
+    }
+    @keyframes powerupGlow {
+      from { box-shadow:0 0 35px rgba(255,204,170,0.5); }
+      to { box-shadow:0 0 80px rgba(255,204,170,0.8); }
+    }
+
+    .combo-text {
+      position:absolute;
+      pointer-events:none;
+      font-size:clamp(3rem, 10vw, 5rem);
+      font-weight:900;
+      color:var(--accent);
+      text-shadow:0 0 35px rgba(255,204,170,0.7);
+      z-index:5000;
+      animation:comboPop 1.5s forwards;
+    }
+    @keyframes comboPop {
+      0% { transform:scale(0.3) translateY(80px); opacity:0; }
+      30% { transform:scale(1.6); opacity:1; }
+      100% { transform:scale(1) translateY(-220px); opacity:0; }
+    }
+
+    #toast-container {
+      position:fixed;
+      top:30px;
+      right:30px;
+      z-index:9999;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      align-items:flex-end;
+      max-height:80vh;
+      overflow-y:auto;
+      padding-right:12px;
+    }
+    .toast {
+      background:rgba(20,0,40,0.95);
+      backdrop-filter:blur(12px);
+      border-left:6px solid var(--accent);
+      padding:14px 26px;
+      border-radius:18px;
+      font-weight:bold;
+      font-size:clamp(1rem, 3vw, 1.2rem);
+      color:var(--accent);
+      box-shadow:0 6px 25px rgba(213,0,249,0.4);
+      max-width:90vw;
+      transform:translateX(140%);
+      opacity:0;
+      transition:all 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .toast.show {
+      transform:translateX(0);
+      opacity:1;
+    }
+
+    #shop-panel, #achievements-panel, #skins-panel {
+      position:fixed;
+      inset:0;
+      background:rgba(10,0,30,0.96);
+      z-index:10010;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      padding:clamp(20px, 5vw, 30px) clamp(10px, 4vw, 20px);
+      overflow-y:auto;
+    }
+    .panel-title {
+      font-size:clamp(3rem, 10vw, 4rem);
+      font-weight:900;
+      margin:clamp(30px, 8vw, 40px) 0 clamp(40px, 10vw, 50px);
+      color:var(--primary);
+      text-shadow:0 0 20px rgba(213,0,249,0.5);
+    }
+    .item, .achievement-item {
+      background:rgba(20,0,40,0.85);
+      border:3px solid var(--primary);
+      border-radius:24px;
+      padding:clamp(15px, 4vw, 25px);
+      margin:clamp(15px, 4vw, 20px) 0;
+      width:95%;
+      max-width:700px;
+      text-align:center;
+      transition:all 0.25s;
+      box-shadow:0 6px 20px rgba(213,0,249,0.3);
+    }
+    .item:hover, .achievement-item:hover {
+      transform:scale(1.04);
+      box-shadow:0 12px 40px rgba(213,0,249,0.5);
+    }
+    .item button {
+      margin-top:20px;
+      padding:14px 40px;
+      font-size:1.6rem;
+    }
+    .bought {
+      background:rgba(213,0,249,0.2);
+      border-color:var(--accent);
+    }
+    .close-btn {
+      position:absolute;
+      top:clamp(20px, 5vw, 30px);
+      right:clamp(20px, 5vw, 40px);
+      font-size:clamp(3.5rem, 10vw, 4.5rem);
+      cursor:pointer;
+      color:var(--danger);
+      transition:all 0.2s;
+    }
+    .close-btn:hover { transform:scale(1.2); }
+
+    #boss-ui {
+      display:none;
+      position:fixed;
+      bottom:clamp(20px, 5vw, 30px);
+      left:50%;
+      transform:translateX(-50%);
+      z-index:10003;
+      text-align:center;
+      width:90%;
+      max-width:800px;
+    }
+    #boss-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 950;
+      pointer-events: none;
+    }
+    #boss-container img {
+      width: clamp(280px, 55vw, 480px);
+      filter: brightness(1.3) drop-shadow(0 0 70px #d500f9) contrast(1.15);
+      pointer-events: auto;
+      cursor: crosshair;
+      animation: bossPulse 2.5s infinite alternate;
+    }
+    @keyframes bossPulse {
+      from { transform: scale(1); filter: brightness(1.3) drop-shadow(0 0 70px #d500f9); }
+      to   { transform: scale(1.08); filter: brightness(1.5) drop-shadow(0 0 100px #ff40df); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="start-screen" class="screen-overlay">
+  <div id="bunny-fall-container"></div>
+  <h1>Caza Conejos</h1>
+  <p style="font-size:clamp(1.8rem,5vw,2.5rem);max-width:90%;margin:40px 0 60px;opacity:0.9; color:#d0a0ff;">
+    Dispara a todos los conejos que veas<br>
+    <strong>El jefe aparece SOLO cuando se acaba el tiempo</strong><br>
+    ¡Los power-ups salen sin fallo!
+  </p>
+  <button id="start-btn">¡Empezar!</button>
+</div>
+
+<div id="game-over" class="screen-overlay" style="display:none;">
+  <h1>¡Fin del juego!</h1>
+  <p id="final-score" style="font-size:clamp(3.5rem,9vw,6rem);margin:40px 0;">Puntuación: 0</p>
+  <button id="restart-btn">Jugar de nuevo</button>
+</div>
+
+<div id="victory-screen" class="screen-overlay" style="display:none;">
+  <h1>¡Victoria épica!</h1>
+  <p id="victory-text" style="font-size:clamp(3.5rem,8vw,5.5rem);margin:40px 0;">
+    ¡Has derrotado al jefe final! Eres una leyenda del caos
+  </p>
+  <button id="restart-victory">Jugar otra vez</button>
+</div>
+
+<div id="ui">
+  <div>Puntos: <span id="score">0</span></div>
+  <div>Combo: <span id="combo">0</span>x</div>
+  <div>Tiempo: <span id="timer">60</span></div>
+  <div id="level-display">Nivel 1</div>
+  <div>Récord: <span id="highscore">0</span></div>
+</div>
+
+<div id="boss-ui">
+  <div style="font-size:clamp(2.5rem,7vw,3.5rem);font-weight:900;margin-bottom:20px;text-shadow:0 0 40px #d500f9;">🔥 ¡EL JEFE FINAL HA APARECIDO! 🔥</div>
+  <div style="width:90%;max-width:800px;height:70px;background:#111;border-radius:35px;overflow:hidden;border:5px solid #d500f9;box-shadow:0 0 50px #d500f9 inset;">
+    <div id="boss-bar" style="height:100%;width:100%;background:linear-gradient(90deg,#d500f9,#ff40df,#d500f9);background-size:400%;animation:bossMove 4s linear infinite;"></div>
+  </div>
+</div>
+
+<div id="boss-container"></div>
+
+<!-- Botones de control - todos juntos y centrados -->
+<div id="bottom-controls">
+  <button class="control-btn" id="shopBtn">🛒</button>
+  <button class="control-btn" id="achievementsBtn">🏆</button>
+  <button class="control-btn" id="skinsBtn">🐰</button>
+  <button class="control-btn" id="musicBtn">🎵</button>
+</div>
+
+<div id="shop-panel">
+  <span class="close-btn" id="closeShop">×</span>
+  <div class="panel-title">Tienda</div>
+  <div id="shop-items"></div>
+</div>
+
+<div id="achievements-panel">
+  <span class="close-btn" id="closeAchievements">×</span>
+  <div class="panel-title">Logros</div>
+  <div id="achievements-list"></div>
+</div>
+
+<div id="skins-panel">
+  <span class="close-btn" id="closeSkins">×</span>
+  <div class="panel-title">Biblioteca de Conejos</div>
+  <div id="skins-list"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- AUDIOS -->
+<audio id="bgMusic" loop preload="auto"><source src="Musica/musica.mp3" type="audio/mpeg"></audio>
+<audio id="hitSound" preload="auto"><source src="Musica/hit.mp3" type="audio/mpeg"></audio>
+<audio id="powerupSound" preload="auto"><source src="Musica/powerup.mp3" type="audio/mpeg"></audio>
+<audio id="bossSound" preload="auto"><source src="Musica/boss.mp3" type="audio/mpeg"></audio>
+<audio id="victorySound" preload="auto"><source src="Musica/victory.mp3" type="audio/mpeg"></audio>
+<audio id="gameoverSound" preload="auto"><source src="Musica/gameover.mp3" type="audio/mpeg"></audio>
+<audio id="goldenSound" preload="auto"><source src="Musica/golden.mp3" type="audio/mpeg"></audio>
+
+<script>
+// ================================================
+// CAZACONEJOS - POWER-UPS ARREGLADOS (menos tiempo + límite 3 + spawn controlado)
+// ================================================
+
+let gameLoopId = null;
+let autoClickerInterval = null;
+let totalBunniesKilled = 0;
+let powerupsCollected = 0;
+let bossesDefeated = 0;
+
+window.addEventListener('load', () => {
+  // Definimos Elements DENTRO del load para que existan cuando se ejecuten los eventos
+  const Elements = {
+    score: document.getElementById("score"),
+    combo: document.getElementById("combo"),
+    timer: document.getElementById("timer"),
+    level: document.getElementById("level-display"),
+    highscore: document.getElementById("highscore"),
+    startScreen: document.getElementById("start-screen"),
+    gameOver: document.getElementById("game-over"),
+    victory: document.getElementById("victory-screen"),
+    finalScore: document.getElementById("final-score"),
+    victoryText: document.getElementById("victory-text"),
+    bossUi: document.getElementById("boss-ui"),
+    bossBar: document.getElementById("boss-bar"),
+    bossContainer: document.getElementById("boss-container"),
+    ui: document.getElementById("ui"),
+    musicBtn: document.getElementById("musicBtn"),
+    toastContainer: document.getElementById("toast-container"),
+    shopPanel: document.getElementById("shop-panel"),
+    shopItems: document.getElementById("shop-items"),
+    achievementsPanel: document.getElementById("achievements-panel"),
+    achievementsList: document.getElementById("achievements-list"),
+    skinsPanel: document.getElementById("skins-panel"),
+    skinsList: document.getElementById("skins-list")
+  };
+  window.Elements = Elements; // Lo hacemos global para que las funciones lo vean
+
+  Object.keys(Achievements).forEach(key => Achievements[key].done = false);
+
+  Game.active = false;
+  Game.bossPhase = false;
+  Game.score = 0;
+  Game.level = 1;
+  Game.combo = 0;
+  Game.maxCombo = 0;
+  Game.timeLeft = 60;
+  Game.pausedTimeLeft = 60;
+  Game.highScore = 0;
+  Game.prestige = 0;
+  Game.prestigeMult = 1;
+  Game.goldenProbMult = 1;
+  Game.upgrades = {
+    doublePoints: false,
+    fasterSpawn: false,
+    moreGolden: false,
+    extraLifeBoss: false,
+    megaComboStart: false,
+    autoClicker: false,
+    triplePoints: false,
+    goldenMagnet: false,
+    powerupMagnet: false,
+    extraTimeStart: false,
+    prestigeBoost: false
+  };
+
+  clearInterval(Game.timerId);
+  clearInterval(Game.powerupInterval);
+  if (autoClickerInterval) clearInterval(autoClickerInterval);
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+
+  bunnies.forEach(b => b?.el?.remove());
+  bunnies = [];
+  if (boss) boss.el?.remove();
+  boss = null;
+
+  document.querySelectorAll('.bunny, .powerup, .combo-text, [style*="position:absolute"]').forEach(el => {
+    if (!el.closest('#ui') && !el.closest('.screen-overlay') && !el.closest('#boss-ui')) el.remove();
+  });
+
+  createBunnyFall();
+
+  Elements.startScreen.style.display = "flex";
+  Elements.gameOver.style.display = "none";
+  Elements.victory.style.display = "none";
+  Elements.bossUi.style.display = "none";
+  Elements.bossContainer.innerHTML = '';
+  Elements.ui.style.opacity = "0";
+
+  Elements.highscore.textContent = "0";
+
+  AvailableSkins.forEach(skin => {
+    if (skin.cost === 0) skin.owned = true;
+    else skin.owned = false;
+  });
+
+  // ================================================
+  // EVENTOS - AHORA SÍ FUNCIONAN porque están dentro del load
+  // ================================================
+
+  document.getElementById("start-btn").onclick = startGame;
+  document.getElementById("restart-btn").onclick = startGame;
+  document.getElementById("restart-victory").onclick = startGame;
+
+  document.getElementById("musicBtn").onclick = () => {
+    if (AudioEl.bg.paused) {
+      AudioEl.bg.play().catch(()=>{});
+      document.getElementById("musicBtn").textContent = "🔊";
+    } else {
+      AudioEl.bg.pause();
+      document.getElementById("musicBtn").textContent = "🎵";
+    }
+  };
+
+  document.getElementById("shopBtn").onclick = openShop;
+  document.getElementById("closeShop").onclick = closeShop;
+
+  document.getElementById("achievementsBtn").onclick = openAchievements;
+  document.getElementById("closeAchievements").onclick = closeAchievements;
+
+  document.getElementById("skinsBtn").onclick = openSkins;
+  document.getElementById("closeSkins").onclick = closeSkins;
+});
+
+const Game = {
+  active: false,
+  bossPhase: false,
+  score: 0,
+  level: 1,
+  combo: 0,
+  maxCombo: 0,
+  timeLeft: 60,
+  pausedTimeLeft: 60,
+  highScore: 0,
+  prestige: 0,
+  prestigeMult: 1,
+  timerId: null,
+  powerupInterval: null,
+  lastTime: 0,
+  clickStreak: 0,
+  lastClick: 0,
+  goldenCaught: 0,
+  activePowerups: 0,
+  isPaused: false,
+  goldenProbMult: 1,
+  upgrades: {
+    doublePoints: false,
+    fasterSpawn: false,
+    moreGolden: false,
+    extraLifeBoss: false,
+    megaComboStart: false,
+    autoClicker: false,
+    triplePoints: false,
+    goldenMagnet: false,
+    powerupMagnet: false,
+    extraTimeStart: false,
+    prestigeBoost: false
+  }
+};
+
+const AudioEl = {
+  bg: document.getElementById("bgMusic"),
+  hit: document.getElementById("hitSound"),
+  powerup: document.getElementById("powerupSound"),
+  boss: document.getElementById("bossSound"),
+  victory: document.getElementById("victorySound"),
+  gameover: document.getElementById("gameoverSound"),
+  golden: document.getElementById("goldenSound")
+};
+
+let activeSkins = {
+  slot1: "imagenes/blanco.png",
+  slot2: "imagenes/negro.png"
+};
+
+let IMAGES = [activeSkins.slot1, activeSkins.slot2];
+const GOLDEN_IMAGE = "imagenes/dorado.png";
+
+const AvailableSkins = [
+  {id: 'blanco', name: 'Conejo Blanco', path: 'imagenes/blanco.png', cost: 0, owned: true},
+  {id: 'negro', name: 'Conejo Negro', path: 'imagenes/negro.png', cost: 0, owned: true},
+  {id: 'choco', name: 'Conejo Choco', path: 'imagenes/Choco.png', cost: 5000, owned: false},
+  {id: 'rosa', name: 'Conejo Rosa', path: 'imagenes/rosa.png', cost: 10000, owned: false},
+  {id: 'verde', name: 'Conejo Verde', path: 'imagenes/verde.png', cost: 15000, owned: false},
+  {id: 'misterioso', name: 'Conejo Misterioso', path: '', cost: 0, owned: false, upcoming: true}
+];
+
+const POWERUPS = [
+  "2X Combo", "5X Combo", "MEGA Combo!", "SLOW", "RAINBOW HELL",
+  "GIGA", "ULTRA BOOM", "NUKE", "RABBIT APOCALYPSE", "EXTRA TIME +20",
+  "FRENZY", "CHAOS MODE", "SPEED DEMON", "POINTS x5", "GOLDEN RUSH",
+  "MEGA GOLDEN", "DOUBLE GOLDEN", "GOLDEN FRENZY"
+];
+
+let bunnies = [];
+let boss = null;
+
+window.rainbowInterval = null;
+window.rainbowEndTime = null;
+
+const Achievements = {
+  "Primer baño de sangre":       { text: "Primer conejo cazado",                      done: false },
+  "Combo peligroso":             { text: "Combo ×50",                                 done: false },
+  "Leyenda viva":                { text: "Combo ×120",                                done: false },
+  "Combo legendario":            { text: "Combo ×250",                                done: false },
+  "Combo imposible":             { text: "Combo ×400",                                done: false },
+  "Cazador dorado":              { text: "15 Golden Bunnies",                         done: false },
+  "Rey dorado":                  { text: "75 Golden Bunnies",                         done: false },
+  "Dios del caos":               { text: "Nivel 35",                                  done: false },
+  "Señor del caos":              { text: "Nivel 75",                                  done: false },
+  "Power-up adicto":             { text: "100 power-ups pillados",                    done: false },
+  "Power-up coleccionista":      { text: "250 power-ups pillados",                    done: false },
+  "Jefe reventado":              { text: "Primer jefe derrotado",                     done: false },
+  "Matador de jefes":            { text: "Derrotar al jefe 8 veces",                  done: false },
+  "Cazador sin piedad":          { text: "3.000 conejos cazados",                     done: false },
+  "Genocida de conejos":         { text: "15.000 conejos cazados",                    done: false },
+  "Millonario del caos":         { text: "10.000.000 puntos en una partida",          done: false },
+  "Multimillonario del caos":    { text: "50.000.000 puntos en una partida",          done: false },
+  "Lluvia Dorada":               { text: "Activar GOLDEN RUSH",                       done: false },
+  "Tormenta Dorada":             { text: "Activar GOLDEN RUSH 15 veces",              done: false },
+  "Máquina de matar":            { text: "Combo 1.200 con Auto-Clicker activo",       done: false },
+  "Imán maestro":                { text: "Cazar 50 dorados con imán activo",          done: false },
+  "Tiempo extra maestro":        { text: "Terminar partida con +40 segundos restantes", done: false }
+};
+
+const ShopItems = [
+  { id: "doublePoints",      name: "Puntos ×2 permanente",           cost: 45000,     desc: "Tus puntos valen el doble siempre" },
+  { id: "fasterSpawn",       name: "Conejos más rápidos",            cost: 95000,     desc: "Aumenta velocidad base de conejos" },
+  { id: "moreGolden",        name: "Golden Bunnies +80%",            cost: 220000,    desc: "Probabilidad de dorados +80%" },
+  { id: "extraLifeBoss",     name: "Jefe +12 vidas",                 cost: 750000,    desc: "Jefe final mucho más resistente" },
+  { id: "megaComboStart",    name: "Empiezas con combo ×35",         cost: 1400000,   desc: "Combo inicial muy alto" },
+  { id: "autoClicker",       name: "Auto-Clicker avanzado",          cost: 480000,    desc: "Clics automáticos más rápidos" },
+  { id: "triplePoints",      name: "Puntos ×3 permanente",           cost: 3200000,   desc: "Puntos valen ×3 (reemplaza ×2)" },
+  { id: "goldenMagnet",      name: "Imán de dorados",                cost: 1800000,   desc: "Dorados se acercan al cursor" },
+  { id: "powerupMagnet",     name: "Imán de power-ups",              cost: 2500000,   desc: "Power-ups se acercan al cursor" },
+  { id: "extraTimeStart",    name: "Partida +25 segundos iniciales", cost: 1100000,   desc: "Empiezas con 85 segundos" },
+  { id: "prestigeBoost",     name: "Prestigio +30% extra",           cost: 6000000,   desc: "Multiplicador de prestigio +0.30" }
+];
+
+// ================================================
+// FUNCIONES AUXILIARES
+// ================================================
+
+function playSound(audio, volume = 1) {
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.volume = volume;
+  audio.play().catch(() => {});
+}
+
+function createParticles(x, y, count = 40, colors = ["#ffd700","#ffeb3b","#fff59d","#ffee58","#ffecb3","#d500f9","#ff40df"], big = false) {
+  const realCount = Math.min(count, big ? 100 : 50);
+
+  for (let i = 0; i < realCount; i++) {
+    const p = document.createElement("div");
+    p.style.position = 'absolute';
+    p.style.pointerEvents = 'none';
+    p.style.zIndex = '2000';
+    p.style.borderRadius = '50%';
+    
+    const size = big ? (12 + Math.random() * 20) : (8 + Math.random() * 14);
+    p.style.width = `${size}px`;
+    p.style.height = `${size}px`;
+    
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    p.style.backgroundColor = color;
+    p.style.boxShadow = `0 0 16px ${color}, 0 0 32px ${color}`;
+    
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
+    p.style.transform = 'translate(-50%, -50%)';
+    
+    document.body.appendChild(p);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = big ? 350 + Math.random() * 450 : 220 + Math.random() * 350;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    const rot = (Math.random() - 0.5) * 900;
+    
+    p.animate([
+      {
+        transform: `translate(-50%, -50%) scale(1) rotate(0deg)`,
+        opacity: 1
+      },
+      {
+        transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.2) rotate(${rot}deg)`,
+        opacity: 0
+      }
+    ], {
+      duration: 1600 + Math.random() * 1200,
+      easing: "cubic-bezier(0.25, 0.8, 0.25, 1)",
+      fill: "forwards"
+    });
+    
+    setTimeout(() => {
+      if (p && p.parentNode) p.remove();
+    }, 3200);
+  }
+}
+
+function showComboText(x, y, combo) {
+  const el = document.createElement("div");
+  el.className = "combo-text";
+  el.textContent = `${combo}x`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.style.color = combo >= 100 ? "#d500f9" : combo >= 50 ? "#ff40df" : "#ffd700";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function showToast(text) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = text;
+  Elements.toastContainer.appendChild(toast);
+  setTimeout(() => toast.classList.add("show"), 50);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 700);
+  }, 3800);
+}
+
+function clearRainbowEffect() {
+  if (window.rainbowInterval) {
+    clearInterval(window.rainbowInterval);
+    window.rainbowInterval = null;
+  }
+  document.body.style.filter = "";
+}
+
+function restoreRainbowIfActive() {
+  if (window.rainbowEndTime && window.rainbowEndTime > Date.now()) {
+    const remaining = window.rainbowEndTime - Date.now();
+    rainbowEffect(remaining);
+  }
+}
+
+function rainbowEffect(duration) {
+  clearRainbowEffect();
+
+  let hue = 0;
+  window.rainbowInterval = setInterval(() => {
+    hue = (hue + 20) % 360;
+    document.body.style.filter = `hue-rotate(${hue}deg) saturate(4) brightness(1.5)`;
+  }, 50);
+
+  window.rainbowEndTime = Date.now() + duration;
+
+  setTimeout(() => {
+    clearRainbowEffect();
+  }, duration);
+}
+
+function pauseGame() {
+  Game.isPaused = true;
+  Game.pausedTimeLeft = Game.timeLeft;
+
+  clearRainbowEffect();
+
+  if (Game.timerId) clearInterval(Game.timerId);
+  if (Game.powerupInterval) clearInterval(Game.powerupInterval);
+  if (autoClickerInterval) clearInterval(autoClickerInterval);
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+}
+
+function resumeGame() {
+  if (!Game.active || !Game.isPaused) return;
+  Game.isPaused = false;
+  Game.lastTime = performance.now();
+  Game.timeLeft = Game.pausedTimeLeft;
+  Elements.timer.textContent = Game.timeLeft;
+
+  restoreRainbowIfActive();
+
+  Game.timerId = setInterval(() => {
+    Game.timeLeft--;
+    Elements.timer.textContent = Game.timeLeft;
+    if (Game.timeLeft <= 0) {
+      if (!Game.bossPhase) {
+        enterBossMode();
+      } else {
+        endGame(false);
+      }
+    }
+  }, 1000);
+
+  if (Game.powerupInterval) clearInterval(Game.powerupInterval);
+  Game.powerupInterval = setInterval(spawnPowerup, 3500 + Math.random() * 2000);
+
+  if (Game.upgrades.autoClicker) startAutoClicker();
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function createBunnyFall() {
+  const container = document.getElementById('bunny-fall-container');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 70; i++) {
+    const bunny = document.createElement('div');
+    bunny.className = 'bunny-fall';
+    const isGolden = Math.random() < 0.3;
+    if (isGolden) {
+      bunny.style.backgroundImage = `url('${GOLDEN_IMAGE}')`;
+      bunny.style.filter = 'drop-shadow(0 0 15px #ffd700) brightness(1.3)';
+    } else {
+      const skinIndex = Math.floor(Math.random() * IMAGES.length);
+      bunny.style.backgroundImage = `url('${IMAGES[skinIndex]}')`;
+      bunny.style.filter = 'drop-shadow(0 0 10px rgba(213,0,249,0.6))';
+    }
+    const size = 28 + Math.random() * 40;
+    bunny.style.width = `${size}px`;
+    bunny.style.height = `${size}px`;
+    bunny.style.left = `${Math.random() * 110 - 5}vw`;
+    const duration = 6 + Math.random() * 16;
+    bunny.style.animationDuration = `${duration}s`;
+    bunny.style.animationDelay = `${Math.random() * 12}s`;
+    container.appendChild(bunny);
+  }
+}
+
+function updateActiveImages() {
+  IMAGES = [activeSkins.slot1, activeSkins.slot2].filter(p => p && p.trim() !== '');
+  if (IMAGES.length === 0) IMAGES = ["imagenes/blanco.png"];
+}
+
+function openShop() {
+  pauseGame();
+  Elements.shopPanel.style.display = "flex";
+  renderShop();
+}
+
+function closeShop() {
+  Elements.shopPanel.style.display = "none";
+  resumeGame();
+}
+
+function renderShop() {
+  Elements.shopItems.innerHTML = "";
+  ShopItems.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
+    if (Game.upgrades[item.id]) div.classList.add("bought");
+    div.innerHTML = `
+      <h3>${item.name}</h3>
+      <p>${item.desc}</p>
+      <p><strong>Coste:</strong> ${item.cost.toLocaleString()} puntos</p>
+      ${Game.upgrades[item.id] ? '<p style="color:#00ff88"><strong>¡Comprado!</strong></p>' : `<button onclick="buyUpgrade('${item.id}', ${item.cost})">Comprar</button>`}
+    `;
+    Elements.shopItems.appendChild(div);
+  });
+}
+
+function buyUpgrade(id, cost) {
+  if (Game.score < cost || Game.upgrades[id]) {
+    showToast(Game.upgrades[id] ? "¡Ya comprado!" : "¡Puntos insuficientes!");
+    return;
+  }
+  Game.score -= cost;
+  Game.upgrades[id] = true;
+  Elements.score.textContent = Game.score;
+  renderShop();
+  showToast(`¡Comprado: ${ShopItems.find(i => i.id === id).name}!`);
+
+  if (id === "autoClicker") {
+    startAutoClicker();
+  }
+}
+
+function startAutoClicker() {
+  if (autoClickerInterval) clearInterval(autoClickerInterval);
+  const intervalTime = Math.max(200, 800 - (Game.combo * 10));
+  autoClickerInterval = setInterval(() => {
+    if (!Game.active || Game.isPaused || Game.bossPhase) return;
+    Game.score += Math.round(5 * Game.combo * Game.level * Game.prestigeMult);
+    Elements.score.textContent = Game.score;
+    createParticles(innerWidth/2, innerHeight/2, 12, ["#d500f9","#ff40df"], false);
+  }, intervalTime);
+}
+
+function openAchievements() {
+  pauseGame();
+  Elements.achievementsPanel.style.display = "flex";
+  renderAchievements();
+}
+
+function closeAchievements() {
+  Elements.achievementsPanel.style.display = "none";
+  resumeGame();
+}
+
+function renderAchievements() {
+  Elements.achievementsList.innerHTML = "";
+  Object.entries(Achievements).forEach(([name, ach]) => {
+    const div = document.createElement("div");
+    div.className = "achievement-item";
+    div.innerHTML = `
+      <h3>${name}</h3>
+      <p>${ach.text}</p>
+      ${ach.done ? '<p style="color:#00ff88">✓ Completado</p>' : '<p>En progreso...</p>'}
+    `;
+    Elements.achievementsList.appendChild(div);
+  });
+}
+
+function openSkins() {
+  pauseGame();
+  Elements.skinsPanel.style.display = "flex";
+  renderSkins();
+}
+
+function closeSkins() {
+  Elements.skinsPanel.style.display = "none";
+  resumeGame();
+}
+
+function renderSkins() {
+  Elements.skinsList.innerHTML = "";
+  AvailableSkins.forEach(skin => {
+    const div = document.createElement("div");
+    div.className = "item";
+    let content = `<h3>${skin.name}</h3>`;
+    if (skin.path && !skin.upcoming) {
+      content += `<img src="${skin.path}" style="width:80px; height:80px; margin:10px auto; display:block;">`;
+    } else if (skin.upcoming) {
+      content += `<div style="width:80px; height:80px; background:#333; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:3rem; color:#fff;">?</div>`;
+    }
+    if (skin.upcoming) {
+      content += `<p>Próximamente</p>`;
+    } else if (skin.owned) {
+      content += `<p style="color:#00ff88">¡Propiedad!</p>
+        <button onclick="equipSkin('${skin.id}', 1)">Equipar en Slot 1</button>
+        <button onclick="equipSkin('${skin.id}', 2)">Equipar en Slot 2</button>`;
+    } else {
+      content += `<p><strong>Coste:</strong> ${skin.cost.toLocaleString()} puntos</p>
+        <button onclick="buySkin('${skin.id}', ${skin.cost})">Comprar</button>`;
+    }
+    div.innerHTML = content;
+    Elements.skinsList.appendChild(div);
+  });
+}
+
+function buySkin(id, cost) {
+  if (Game.score < cost) {
+    showToast("¡Puntos insuficientes!");
+    return;
+  }
+  Game.score -= cost;
+  Elements.score.textContent = Game.score;
+  const skin = AvailableSkins.find(s => s.id === id);
+  skin.owned = true;
+  showToast(`¡Comprado: ${skin.name}! Ve a la biblioteca para equipar.`);
+  renderSkins();
+}
+
+function equipSkin(id, slot) {
+  const skin = AvailableSkins.find(s => s.id === id);
+  if (!skin.owned) return;
+  if (slot === 1) {
+    activeSkins.slot1 = skin.path;
+  } else if (slot === 2) {
+    activeSkins.slot2 = skin.path;
+  }
+  updateActiveImages();
+  showToast(`¡${skin.name} equipado en Slot ${slot}!`);
+  renderSkins();
+  if (Elements.startScreen.style.display === "flex") {
+    createBunnyFall();
+  }
+}
+
+function checkAchievements() {
+  if (!Achievements["Primer baño de sangre"].done && totalBunniesKilled >= 1) {
+    Achievements["Primer baño de sangre"].done = true;
+    showToast("★ Primer baño de sangre");
+  }
+  if (!Achievements["Combo peligroso"].done && Game.maxCombo >= 50) {
+    Achievements["Combo peligroso"].done = true;
+    showToast("★ Combo peligroso ×50");
+  }
+  if (!Achievements["Leyenda viva"].done && Game.maxCombo >= 120) {
+    Achievements["Leyenda viva"].done = true;
+    showToast("★ Leyenda viva ×120");
+  }
+  if (!Achievements["Combo legendario"].done && Game.maxCombo >= 250) {
+    Achievements["Combo legendario"].done = true;
+    showToast("★ Combo legendario ×250");
+  }
+  if (!Achievements["Combo imposible"].done && Game.maxCombo >= 400) {
+    Achievements["Combo imposible"].done = true;
+    showToast("★ Combo imposible ×400");
+  }
+  if (!Achievements["Cazador dorado"].done && Game.goldenCaught >= 15) {
+    Achievements["Cazador dorado"].done = true;
+    showToast("★ Cazador dorado ×15");
+  }
+  if (!Achievements["Rey dorado"].done && Game.goldenCaught >= 75) {
+    Achievements["Rey dorado"].done = true;
+    showToast("★ Rey dorado ×75");
+  }
+  if (!Achievements["Dios del caos"].done && Game.level >= 35) {
+    Achievements["Dios del caos"].done = true;
+    showToast("★ Dios del caos - Nivel 35");
+  }
+  if (!Achievements["Señor del caos"].done && Game.level >= 75) {
+    Achievements["Señor del caos"].done = true;
+    showToast("★ Señor del caos - Nivel 75");
+  }
+  if (!Achievements["Power-up adicto"].done && powerupsCollected >= 100) {
+    Achievements["Power-up adicto"].done = true;
+    showToast("★ Power-up adicto ×100");
+  }
+  if (!Achievements["Power-up coleccionista"].done && powerupsCollected >= 250) {
+    Achievements["Power-up coleccionista"].done = true;
+    showToast("★ Power-up coleccionista ×250");
+  }
+  if (!Achievements["Jefe reventado"].done && bossesDefeated >= 1) {
+    Achievements["Jefe reventado"].done = true;
+    showToast("★ Jefe reventado");
+  }
+  if (!Achievements["Matador de jefes"].done && bossesDefeated >= 8) {
+    Achievements["Matador de jefes"].done = true;
+    showToast("★ Matador de jefes ×8");
+  }
+  if (!Achievements["Cazador sin piedad"].done && totalBunniesKilled >= 3000) {
+    Achievements["Cazador sin piedad"].done = true;
+    showToast("★ Cazador sin piedad ×3000");
+  }
+  if (!Achievements["Genocida de conejos"].done && totalBunniesKilled >= 15000) {
+    Achievements["Genocida de conejos"].done = true;
+    showToast("★ Genocida de conejos ×15000");
+  }
+  if (!Achievements["Millonario del caos"].done && Game.score >= 10000000) {
+    Achievements["Millonario del caos"].done = true;
+    showToast("★ Millonario del caos - 10M");
+  }
+  if (!Achievements["Multimillonario del caos"].done && Game.score >= 50000000) {
+    Achievements["Multimillonario del caos"].done = true;
+    showToast("★ Multimillonario del caos - 50M");
+  }
+  if (!Achievements["Lluvia Dorada"].done && Game.goldenCaught >= 15) {
+    Achievements["Lluvia Dorada"].done = true;
+    showToast("★ Lluvia Dorada - ¡GOLDEN RUSH master!");
+  }
+  if (!Achievements["Tormenta Dorada"].done && Game.goldenCaught >= 30) {
+    Achievements["Tormenta Dorada"].done = true;
+    showToast("★ Tormenta Dorada ×15 GOLDEN RUSH");
+  }
+}
+
+function updateBunnyStyle(b) {
+  b.el.style.setProperty('--x', b.x + 'px');
+  b.el.style.setProperty('--y', b.y + 'px');
+  b.el.style.setProperty('--rot', b.angle + 'deg');
+  b.el.style.setProperty('--s', b.scale);
+}
+
+function spawnBunny(isGolden = false) {
+  if (!Game.active || Game.bossPhase) return null;
+
+  const container = document.createElement("div");
+  container.className = "bunny-container";
+
+  const img = new Image();
+  img.src = isGolden ? GOLDEN_IMAGE : IMAGES[Math.floor(Math.random() * IMAGES.length)];
+  img.className = `bunny${isGolden ? ' golden-bunny' : ''}`;
+  img.draggable = false;
+
+  container.appendChild(img);
+  document.body.appendChild(container);
+
+  const baseSize = Math.min(innerWidth, innerHeight) * 0.08 + Math.random() * 60;
+  const visualSize = isGolden ? baseSize * 2.2 : Math.max(40, baseSize);
+  const hitSize = visualSize * 1.5; // hitbox más grande
+
+  img.style.width = `${visualSize}px`;
+  img.style.height = `${visualSize}px`;
+
+  container.style.width = `${hitSize}px`;
+  container.style.height = `${hitSize}px`;
+  container.style.left = `${Math.random() * (innerWidth - hitSize)}px`;
+  container.style.top = `${Math.random() * (innerHeight - hitSize)}px`;
+
+  const data = {
+    el: container,
+    imgEl: img,
+    size: hitSize,
+    x: parseFloat(container.style.left),
+    y: parseFloat(container.style.top),
+    vx: (Math.random() > 0.5 ? 1 : -1) * (130 + Math.random() * 240) * (1 + (Game.level - 1) * 0.12 + Game.prestige * 0.1),
+    vy: (Math.random() > 0.5 ? 1 : -1) * (130 + Math.random() * 240) * (1 + (Game.level - 1) * 0.12 + Game.prestige * 0.1),
+    va: (Math.random() > 0.5 ? 1 : -1) * (400 + Math.random() * 800),
+    angle: Math.random() * 360,
+    scale: 0.8 + Math.random() * 1.2,
+    alive: true,
+    isGolden
+  };
+
+  container.style.transform = `translate3d(${data.x}px, ${data.y}px, 0) rotate(${data.angle}deg) scale(${data.scale})`;
+
+  container.onclick = () => {
+    if (!data.alive) return;
+    data.alive = false;
+    totalBunniesKilled++;
+    Game.combo++;
+    Game.maxCombo = Math.max(Game.maxCombo, Game.combo);
+
+    let pointsBase = isGolden ? 1500 : 10 * Game.combo * Game.level;
+
+    if (Game.upgrades.triplePoints) {
+      pointsBase *= 3;
+    } else if (Game.upgrades.doublePoints) {
+      pointsBase *= 2;
+    }
+
+    Game.score += Math.round(pointsBase * Game.prestigeMult);
+    showComboText(data.x + hitSize/2, data.y + hitSize/2, Game.combo);
+    playSound(isGolden ? AudioEl.golden : AudioEl.hit, isGolden ? 0.9 : 0.7);
+
+    const particleColors = isGolden 
+      ? ["#ffd700","#ffdd44","#ffff88","#ffcc00","#ffeb3b","#fff176"]
+      : ["#d500f9","#ff40df","#ffd700","#ff1744","#00ffff","#c2185b"];
+
+    createParticles(data.x + hitSize/2, data.y + hitSize/2, isGolden ? 100 : 40 + Game.combo, particleColors, Game.combo > 15);
+
+    const now = Date.now();
+    if (now - Game.lastClick < 70) {
+      Game.clickStreak++;
+      if (Game.clickStreak >= 15) {
+        document.body.classList.add('rage-mode');
+        setTimeout(() => document.body.classList.remove('rage-mode'), 7000);
+        Game.score += 800 * Game.clickStreak;
+      }
+    } else Game.clickStreak = 0;
+    Game.lastClick = now;
+    if (Game.combo === 69) {
+      document.body.style.filter = "hue-rotate(300deg) saturate(4)";
+      setTimeout(() => document.body.style.filter = "", 12000);
+    }
+    Elements.score.textContent = Game.score;
+    Elements.combo.textContent = Game.combo;
+    if (Game.score >= Game.level * 6000) {
+      Game.level++;
+      Elements.level.textContent = `Nivel ${Game.level}`;
+    }
+    if (isGolden) {
+      Game.goldenCaught++;
+      Game.score += 5000 * Game.level;
+    }
+    checkAchievements();
+    container.style.opacity = "0";
+    container.style.transform += " scale(0.2)";
+    setTimeout(() => {
+      container.remove();
+      bunnies = bunnies.filter(b => b !== data);
+      if (!isGolden) {
+        const baseChance = 0.025 + (Game.upgrades.moreGolden ? 0.015 : 0);
+        const goldenChance = baseChance * Game.goldenProbMult;
+        if (Math.random() < goldenChance) spawnBunny(true);
+        else spawnBunny();
+      }
+      if (bunnies.length < 8 && Game.active && !Game.bossPhase) {
+        setTimeout(spawnBunny, 200 + Math.random() * 400);
+      }
+    }, 400);
+  };
+  bunnies.push(data);
+}
+
+function spawnPowerup() {
+  if (!Game.active || Game.bossPhase || Game.activePowerups >= 3 || Game.isPaused) return;
+
+  Game.activePowerups++;
+  const pu = document.createElement("div");
+  pu.className = "powerup";
+  const type = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
+  pu.textContent = type.split(" ").join("\n");
+  const size = Math.min(140, Math.max(100, innerWidth * 0.18));
+  pu.style.width = pu.style.height = `${size}px`;
+  pu.style.left = `${Math.random() * (innerWidth - size)}px`;
+  pu.style.top = `${Math.random() * (innerHeight - size)}px`;
+  document.body.appendChild(pu);
+
+  let used = false;
+  pu.onclick = () => {
+    if (used) return;
+    used = true;
+    Game.activePowerups = Math.max(0, Game.activePowerups - 1);
+    playSound(AudioEl.powerup, 0.8);
+    Game.score += 800 * Game.level;
+    activatePowerup(type);
+    powerupsCollected++;
+    pu.style.transform = "scale(0.1) rotate(360deg)";
+    pu.style.opacity = "0";
+    setTimeout(() => pu.remove(), 400);
+  };
+
+  setTimeout(() => {
+    if (!used && pu.parentNode) {
+      Game.activePowerups = Math.max(0, Game.activePowerups - 1);
+      pu.style.transform = "scale(0.1) rotate(-360deg)";
+      pu.style.opacity = "0";
+      setTimeout(() => pu.remove(), 400);
+    }
+  }, 3000 + Math.random() * 1000);
+}
+
+function activatePowerup(type) {
+  switch(type) {
+    case "2X Combo":
+      Game.combo *= 2;
+      setTimeout(() => Game.combo = Math.floor(Game.combo / 2), 10000);
+      showToast("¡Combo duplicado por 10 segundos!");
+      break;
+    case "5X Combo":
+      Game.combo *= 5;
+      setTimeout(() => Game.combo = Math.floor(Game.combo / 5), 8000);
+      showToast("¡Combo x5 activado!");
+      break;
+    case "MEGA Combo!":
+      Game.combo *= 8;
+      setTimeout(() => Game.combo = Math.floor(Game.combo / 4), 7000);
+      showToast("¡Mega combo activado!");
+      break;
+    case "SLOW":
+      bunnies.forEach(b => { b.vx *= 0.3; b.vy *= 0.3; });
+      setTimeout(() => bunnies.forEach(b => { b.vx /= 0.3; b.vy /= 0.3; }), 9000);
+      showToast("¡Los conejos se mueven más lento!");
+      break;
+    case "RAINBOW HELL":
+      rainbowEffect(14000);
+      showToast("¡Modo arcoíris activado!");
+      break;
+    case "GIGA":
+      bunnies.forEach(b => { b.scale *= 4; b.size *= 4; b.imgEl.style.width = `${b.size}px`; });
+      setTimeout(() => bunnies.forEach(b => { b.scale /= 4; b.size /= 4; b.imgEl.style.width = `${b.size}px`; }), 6500);
+      showToast("¡Conejos gigantes!");
+      break;
+    case "ULTRA BOOM":
+      massKill(40, 1500);
+      showToast("¡Ultra explosión!");
+      for (let i = 0; i < 20; i++) setTimeout(spawnBunny, i * 80 + Math.random() * 120);
+      break;
+    case "NUKE":
+      massKill(80, 2500, true);
+      showToast("¡Explosión nuclear!");
+      for (let i = 0; i < 40; i++) setTimeout(spawnBunny, i * 50 + Math.random() * 80);
+      break;
+    case "RABBIT APOCALYPSE":
+      for(let i=0; i<100; i++) setTimeout(spawnBunny, i*25);
+      Game.score += 2000;
+      showToast("¡Apocalipsis de conejos!");
+      break;
+    case "EXTRA TIME +20":
+      Game.timeLeft += 20;
+      showToast("¡+20 segundos de tiempo!");
+      break;
+    case "FRENZY":
+      clearInterval(Game.powerupInterval);
+      Game.powerupInterval = setInterval(spawnPowerup, 600);
+      setTimeout(() => {
+        clearInterval(Game.powerupInterval);
+        Game.powerupInterval = setInterval(spawnPowerup, 3500 + Math.random() * 2000);
+      }, 9000);
+      showToast("¡Frenesí de power-ups!");
+      break;
+    case "CHAOS MODE":
+      activatePowerup(POWERUPS[Math.floor(Math.random()*POWERUPS.length)]);
+      showToast("¡Modo caos!");
+      break;
+    case "SPEED DEMON":
+      bunnies.forEach(b => { b.vx *= 2.2; b.vy *= 2.2; });
+      setTimeout(() => bunnies.forEach(b => { b.vx /= 2.2; b.vy /= 2.2; }), 7000);
+      showToast("¡Conejos más rápidos!");
+      break;
+    case "POINTS x5":
+      Game.score += 5000 * Game.level;
+      showToast("¡Puntos x5!");
+      break;
+    case "GOLDEN RUSH":
+      Achievements["Lluvia Dorada"].done = true;
+      const cantidad = 8 + Math.floor(Math.random() * 5) + Math.floor(Game.level / 3);
+      showToast(`¡GOLDEN RUSH! Han aparecido ${cantidad} conejos dorados`);
+      document.body.classList.add('golden-rush-effect');
+      setTimeout(() => document.body.classList.remove('golden-rush-effect'), 1200);
+      for(let i = 0; i < cantidad; i++) {
+        setTimeout(() => spawnBunny(true), i * 250 + Math.random() * 350);
+      }
+      Game.score += 3000 * Game.level;
+      createParticles(innerWidth/2, innerHeight/2, 120, ["#ffd700","#ffdd44","#ffff88","#ffcc00"], true);
+      break;
+    case "MEGA GOLDEN":
+      showToast("¡MEGA GOLDEN! Un conejo dorado gigante ha aparecido");
+      const megaData = spawnBunny(true);
+      if (megaData) {
+        megaData.scale *= 3;
+        megaData.size *= 3;
+        megaData.imgEl.style.width = `${megaData.size}px`;
+        megaData.el.onclick = () => {
+          if (!megaData.alive) return;
+          megaData.alive = false;
+          Game.score += 10000 * Game.level * Game.combo;
+          showToast(`¡MEGA GOLDEN cazado! +${10000 * Game.level * Game.combo} puntos`);
+          createParticles(megaData.x + megaData.size/2, megaData.y + megaData.size/2, 200, ["#ffd700","#ffdd44","#ffff88"], true);
+          megaData.el.remove();
+          bunnies = bunnies.filter(b => b !== megaData);
+        };
+      }
+      break;
+    case "DOUBLE GOLDEN":
+      showToast("¡DOUBLE GOLDEN! Más conejos dorados durante 15 segundos");
+      Game.goldenProbMult = 2;
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => spawnBunny(true), i * 350 + 200);
+      }
+      setTimeout(() => {
+        Game.goldenProbMult = 1;
+        showToast("DOUBLE GOLDEN terminado");
+      }, 15000);
+      break;
+    case "GOLDEN FRENZY":
+      showToast("¡GOLDEN FRENZY! Oleada rápida de dorados");
+      let count = 0;
+      const frenzy = setInterval(() => {
+        spawnBunny(true);
+        count++;
+        if (count >= 18) clearInterval(frenzy);
+      }, 450);
+      setTimeout(() => clearInterval(frenzy), 8500);
+      break;
+  }
+}
+
+function massKill(count, pointsPer, nuke = false) {
+  bunnies.forEach(b => {
+    b.alive = false;
+    createParticles(b.x + b.size/2, b.y + b.size/2, 25);
+    b.el.remove();
+  });
+  bunnies = [];
+  Game.score += count * pointsPer;
+  createParticles(innerWidth/2, innerHeight/2, nuke ? 180 : 100,
+    nuke ? ["#ff0000","#ff8800","#ffff00","#ff4500"] : ["#d500f9","#ff40df","#ffd700"], true);
+  const repopCount = Math.max(15, count / 3);
+  for (let i = 0; i < repopCount; i++) {
+    setTimeout(() => {
+      if (Game.active && !Game.bossPhase) spawnBunny(Math.random() < 0.15);
+    }, i * 60 + Math.random() * 100);
+  }
+}
+
+function enterBossMode() {
+  if (Game.bossPhase) return;
+  Game.bossPhase = true;
+
+  if (Game.timerId) {
+    clearInterval(Game.timerId);
+    Game.timerId = null;
+  }
+  Elements.timer.textContent = "∞";
+
+  bunnies.forEach(b => b.el?.remove());
+  bunnies = [];
+
+  Elements.ui.style.opacity = "0.4";
+
+  Elements.bossUi.style.display = "block";
+
+  const bossEl = new Image();
+  bossEl.src = "videos/efecto de fuego.gif";
+  bossEl.alt = "Jefe final";
+  bossEl.style.pointerEvents = "auto";
+  bossEl.style.cursor = "crosshair";
+  Elements.bossContainer.appendChild(bossEl);
+
+  const baseLives = 8;
+  const levelBonus = Math.floor(Game.level * 1.8);
+  const prestigeBonus = Game.prestige * 4;
+  const upgradeBonus = Game.upgrades.extraLifeBoss ? 5 : 0;
+  const totalLives = baseLives + levelBonus + prestigeBonus + upgradeBonus;
+
+  boss = {
+    el: bossEl,
+    lives: totalLives,
+    maxLives: totalLives,
+    alive: true
+  };
+
+  Elements.bossBar.style.width = "100%";
+
+  bossEl.onclick = () => {
+    if (!boss.alive || !Game.active) return;
+
+    boss.lives--;
+    const percent = Math.max(0, (boss.lives / boss.maxLives) * 100);
+    Elements.bossBar.style.width = `${percent}%`;
+
+    playSound(AudioEl.hit, 0.85);
+    createParticles(innerWidth/2, innerHeight/2, 80, ["#d500f9","#ff40df","#ffd700","#ff1744","#ff0000","#ffffff"], true);
+
+    showToast(`¡Jefe herido! Vidas restantes: ${boss.lives}/${boss.maxLives}`);
+
+    if (boss.lives <= 0) {
+      boss.alive = false;
+      boss.el.remove();
+      boss = null;
+      bossesDefeated++;
+
+      Game.score += 25000 * Game.level;
+      playSound(AudioEl.victory, 0.9);
+
+      Achievements["Jefe reventado"].done = true;
+      showToast("★ ¡Jefe reventado! Primera victoria épica contra el boss final");
+
+      Elements.victoryText.textContent = `¡Has destruido al jefe final! Nivel ${Game.level} - Leyenda del caos`;
+      Elements.victory.style.display = "flex";
+
+      endGame(true);
+    }
+  };
+
+  playSound(AudioEl.boss, 0.7);
+  showToast("¡EL JEFE FINAL HA APARECIDO! El tiempo está parado... ¡Destrúyelo para ganar!");
+}
+
+function gameLoop(timestamp) {
+  if (!Game.active) return;
+  if (!Game.lastTime) Game.lastTime = timestamp;
+  const delta = (timestamp - Game.lastTime) / 1000;
+  Game.lastTime = timestamp;
+
+  if (!Game.bossPhase) {
+    bunnies.forEach(b => {
+      if (!b.alive) return;
+      b.x += b.vx * delta;
+      b.y += b.vy * delta;
+      b.angle += b.va * delta;
+      if (b.x <= 0 || b.x + b.size >= innerWidth) b.vx *= -1;
+      if (b.y <= 0 || b.y + b.size >= innerHeight) b.vy *= -1;
+      b.el.style.transform = `translate3d(${b.x}px, ${b.y}px, 0) rotate(${b.angle}deg) scale(${b.scale})`;
+    });
+  }
+
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  bunnies.forEach(b => b?.el?.remove());
+  bunnies = [];
+  if (boss) {
+    boss.el?.remove();
+    boss = null;
+  }
+  if (Game.timerId) clearInterval(Game.timerId);
+  if (Game.powerupInterval) clearInterval(Game.powerupInterval);
+  if (autoClickerInterval) clearInterval(autoClickerInterval);
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  clearRainbowEffect();
+
+  updateActiveImages();
+
+  Game.active = true;
+  Game.bossPhase = false;
+  Game.goldenProbMult = 1;
+  Game.score = Game.upgrades.megaComboStart ? 100 : 0;
+  Game.level = 1;
+  Game.combo = Game.upgrades.megaComboStart ? 10 : 0;
+  Game.maxCombo = 0;
+  Game.timeLeft = Game.upgrades.extraTimeStart ? 85 : 60;
+  Game.clickStreak = 0;
+  Game.activePowerups = 0;
+  Game.isPaused = false;
+
+  Elements.score.textContent = Game.score;
+  Elements.combo.textContent = Game.combo;
+  Elements.timer.textContent = Game.timeLeft;
+  Elements.level.textContent = "Nivel 1";
+  Elements.startScreen.style.display = "none";
+  Elements.gameOver.style.display = "none";
+  Elements.victory.style.display = "none";
+  Elements.bossUi.style.display = "none";
+  Elements.bossContainer.innerHTML = '';
+  Elements.ui.style.opacity = "1";
+
+  const bunnyFallContainer = document.getElementById('bunny-fall-container');
+  if (bunnyFallContainer) bunnyFallContainer.innerHTML = '';
+
+  for (let i = 0; i < 25 + Game.level * 6; i++) {
+    setTimeout(spawnBunny, i * 35 + Math.random() * 80);
+  }
+
+  if (Game.powerupInterval) clearInterval(Game.powerupInterval);
+  Game.powerupInterval = setInterval(spawnPowerup, 3500 + Math.random() * 2000);
+
+  Game.timerId = setInterval(() => {
+    Game.timeLeft--;
+    Elements.timer.textContent = Game.timeLeft;
+    if (Game.timeLeft <= 0) {
+      if (!Game.bossPhase) {
+        enterBossMode();
+      } else {
+        endGame(false);
+      }
+    }
+  }, 1000);
+
+  if (Game.upgrades.autoClicker) startAutoClicker();
+
+  playSound(AudioEl.bg, 0.45);
+  gameLoopId = requestAnimationFrame(gameLoop);
+  showToast("¡Buena suerte! El jefe aparecerá cuando se acabe el tiempo");
+}
+
+function endGame(victory = false) {
+  Game.active = false;
+  if (Game.timerId) clearInterval(Game.timerId);
+  if (Game.powerupInterval) clearInterval(Game.powerupInterval);
+  if (autoClickerInterval) clearInterval(autoClickerInterval);
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  AudioEl.bg.pause();
+  clearRainbowEffect();
+
+  if (victory) {
+    Elements.victory.style.display = "flex";
+    playSound(AudioEl.victory);
+  } else {
+    Elements.finalScore.textContent = `Puntuación final: ${Game.score}`;
+    Elements.gameOver.style.display = "flex";
+    playSound(AudioEl.gameover);
+  }
+
+  if (Game.score > Game.highScore) {
+    Game.highScore = Game.score;
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (!Game.active || Game.bossPhase) return;
+  bunnies.forEach(b => {
+    if (!b.alive) return;
+    if (b.x + b.size > innerWidth) b.x = innerWidth - b.size - 10;
+    if (b.y + b.size > innerHeight) b.y = innerHeight - b.size - 10;
+    if (b.x < 0) b.x = 10;
+    if (b.y < 0) b.y = 10;
+    b.el.style.transform = `translate3d(${b.x}px, ${b.y}px, 0) rotate(${b.angle}deg) scale(${b.scale})`;
+  });
+});
+</script>
+</body>
+</html>

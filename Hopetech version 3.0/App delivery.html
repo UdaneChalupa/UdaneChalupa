@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HopeTECH - App Delivery</title>
+  <link rel="icon" href="imagenes/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="caja-general cabecera">
+    <a href="index.html" class="logo" aria-label="HopeTECH - Volver al inicio">HopeTECH</a>
+    <nav class="nav-principal">
+      <ul class="menu">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+        <li class="menu-item-desplegable">
+          <a href="servicios.html" class="activo">Servicios <i class="fas fa-chevron-down" style="font-size:0.8rem;margin-left:8px;"></i></a>
+          <ul class="submenu-precios">
+            <li class="submenu-tarjeta"><a href="precios.html"><strong>Precios</strong></a></li>
+          </ul>
+        </li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+      </ul>
+      <div class="botones-derecha">
+        <button id="theme-toggle" aria-label="Cambiar modo oscuro/claro">
+          <i class="fas fa-sun"></i>
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="boton-menu" aria-expanded="false" aria-label="Abrir menú">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- CONTENIDO APP DELIVERY -->
+<section class="contenido-delivery" id="app-delivery">
+  <h2 style="text-align:center; color: var(--morado-oscuro); margin-bottom:40px;">App Delivery a tu medida</h2>
+  <p style="text-align:center; max-width:900px; margin:0 auto 50px; font-size:1.05rem; line-height:1.7;">
+    Lanzamos apps de delivery completas, listas para clientes, repartidores y negocios. Todo integrado, seguro y rápido desde el primer día.
+  </p>
+
+  <!-- TARJETAS DE FUNCIONALIDADES -->
+  <div class="cuadricula-servicios">
+    <div class="tarjeta" data-aos="fade-up">
+      <div class="icono-circulo"><i class="fas fa-mobile-alt"></i></div>
+      <h3>App de clientes</h3>
+      <p>Interfaz moderna y fácil de usar. Pedidos rápidos, favoritos y notificaciones en tiempo real.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="100">
+      <div class="icono-circulo"><i class="fas fa-biking"></i></div>
+      <h3>App de repartidores</h3>
+      <p>Gestión de rutas, seguimiento de pedidos y control de ganancias. Todo optimizado para la eficiencia.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="200">
+      <div class="icono-circulo"><i class="fas fa-store"></i></div>
+      <h3>Panel para negocios</h3>
+      <p>Administra menús, productos, pedidos y promociones desde un panel centralizado y fácil de usar.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="300">
+      <div class="icono-circulo"><i class="fas fa-bolt"></i></div>
+      <h3>Pedidos en segundos</h3>
+      <p>Flujo optimizado para que tus clientes completen su compra en tiempo récord y sin fricciones.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="400">
+      <div class="icono-circulo"><i class="fas fa-map-marked-alt"></i></div>
+      <h3>Seguimiento en tiempo real</h3>
+      <p>Mapa interactivo, notificaciones automáticas y transparencia total en cada entrega.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="500">
+      <div class="icono-circulo"><i class="fas fa-credit-card"></i></div>
+      <h3>Pagos integrados</h3>
+      <p>Tarjeta, Bizum, Apple Pay y Google Pay. Seguridad máxima y flujo de pago simplificado.</p>
+    </div>
+
+    <div class="tarjeta" data-aos="fade-up" data-aos-delay="600">
+      <div class="icono-circulo"><i class="fas fa-headset"></i></div>
+      <h3>Soporte 24/7</h3>
+      <p>Asistencia, mantenimiento y actualizaciones continuas. Tu app funcionando siempre al 100%.</p>
+    </div>
+  </div>
+
+  <!-- IMAGEN ILUSTRATIVA -->
+  <div style="text-align:center; margin-top:80px;">
+    <img src="imagenes/app delivery.jpg" 
+         alt="App Delivery HopeTECH" 
+         style="width:90%; max-width:900px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.1);">
+  </div>
+
+  <!-- CTA FINAL -->
+  <h2 style="text-align:center; color: var(--morado-oscuro); margin-top:80px;">Lanza tu app hoy</h2>
+  <p style="text-align:center; max-width:800px; margin:20px auto; font-size:1.05rem; line-height:1.7;">
+    Contacta con HopeTECH y obtén tu app de delivery personalizada: clientes, repartidores y negocios totalmente integrados, seguros y listos para crecer.
+  </p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="caja-general footer-grid">
+    <div class="footer-col">
+      <h3 style="font-size:2.8rem;font-weight:800;color:white;margin-bottom:20px;">
+        <a href="/" class="logo" aria-label="HopeTECH - Volver al inicio">HopeTECH</a>
+      </h3>
+      <p style="color:#ddd;max-width:300px;line-height:1.7;">Proyecto del CIFP Txurdinaga LHII · Soluciones tecnológicas innovadoras desde Bilbao</p>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Enlaces</h4>
+      <ul style="list-style:none;color:#ccc;line-height:2.2;">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="sobre-nosotros.html">Sobre nosotros</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="proyectos.html">Proyectos</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Contacto</h4>
+      <p style="color:#ccc;line-height:2;">
+        <i class="fas fa-envelope" style="color:#ff6f61;margin-right:12px;"></i> hope.tech.confiable@gmail.com<br>
+        <i class="fas fa-phone" style="color:#ff6f61;margin-right:12px;"></i> +34 944 125 712<br>
+        <i class="fas fa-map-marker-alt" style="color:#ff6f61;margin-right:12px;"></i> Doctor Ornilla 2, Bilbao
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4 style="color:white;font-size:1.4rem;margin-bottom:25px;font-weight:700;">Créditos</h4>
+      <p style="color:#ccc;font-size:0.95rem;line-height:1.8;">
+        © 2025 HopeTECH<br>
+        Todos los derechos reservados<br><br>
+        Imágenes de <a href="https://freepik.com" target="_blank" style="color:#ff6f61;text-decoration:none;">Freepik</a>
+      </p>
+    </div>
+  </div>
+  <div style="text-align:center;padding:30px;background:#2d1b69;color:#999;font-size:0.9rem;">
+    Hecho con <i class="fas fa-heart" style="color:#ff6f61;"></i> por el mejor grupo del CIFP Txurdinaga LHII
+  </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="Javascript/script.js" defer></script>
+<script src="Javascript/bromita.js" defer></script>
+</body>
+</html>
